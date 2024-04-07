@@ -22,8 +22,6 @@ export const singUp = async (req, res) => {
         }
 
         const savedUser = await newUser.save();
-        
-        // Retornar la información del usuario en lugar de solo el token
         res.status(200).json({ user: savedUser });
     } catch (error) {
         console.error(error);
