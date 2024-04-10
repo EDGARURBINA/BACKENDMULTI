@@ -3,6 +3,7 @@ import  jwt  from "jsonwebtoken";
 import config from "../config";
 import Role from "../models/Role";
 
+
 export const singUp = async (req, res) => {
     const { username, email, password, roles } = req.body;
 
@@ -34,7 +35,6 @@ export const singUp = async (req, res) => {
 export const singin = async (req, res) => {
     const userFound = await User.findOne({email: req.body.email}).populate("roles");
 
-
     if(!userFound) return res.status(400).json({message:"user not found"})
 
     const matchPassword = await  User.comparePassword(req.body.password, userFound.password)
@@ -44,8 +44,7 @@ export const singin = async (req, res) => {
    const token =  jwt.sign({id: userFound._id}, config.SECRET,{
     expiresIn : 86400
    })
-
+ 
     console.log(userFound)
     res.json({token})
-
 };

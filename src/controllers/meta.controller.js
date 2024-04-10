@@ -11,7 +11,6 @@ export const createMeta = async (req, res) => {
     }
 }
 
-
 export const getMetas = async (req, res) => {
     try {
         const verMetas = await Meta.find()
@@ -21,7 +20,6 @@ export const getMetas = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener las metas' });
     }
 }
-
 
 export const getMetaById = async (req, res) => {
     try {
@@ -34,14 +32,12 @@ export const getMetaById = async (req, res) => {
     }
 }
 
-
 export const updateMetaById = async (req, res) => {
     const updatedMeta = await Meta.findByIdAndUpdate(req.params.metasId, req.body, {
         new: true
     });
     res.status(200).json({ message: "Meta actualizada correctamente",updatedMeta});
 };
-
 
 export const deleteMetaById = async (req, res) => {
     const {metasId} = req.params;
