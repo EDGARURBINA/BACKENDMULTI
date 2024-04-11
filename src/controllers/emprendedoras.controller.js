@@ -1,17 +1,43 @@
 import Emprendedoras from "../models/Emprendedoras"
 import Meta from "../models/Meta";
+import Tip from "../models/Tip";
+
 
 export const createEmprendedora = async (req, res) => {
-    const { nombre, numeroCliente, tips, semanas, ventaTotal, apellidos,img } = req.body;
-
+    const { nombre, numeroCliente, ventaTotal, apellidos, img, tipData } = req.body;
     try {
-        const newEmprendedora = new Emprendedoras({ nombre, numeroCliente, tips, semanas, ventaTotal,apellidos, img });
+        const currentDate = new Date();
+        const tipNumber = Math.floor(currentDate.getTime() / (1000 * 60 * 60 * 24 * 21)) + 1; 
+
+        const newTip = new Tip({
+            tipData,
+            numero: tipNumber
+        });
+
+        const tipSaved = await newTip.save();
+
+        const newEmprendedora = new Emprendedoras({ 
+            nombre, 
+            numeroCliente, 
+            ventaTotal, 
+            apellidos, 
+            img, 
+            tip: tipSaved._id 
+        });
+
         const emprendedoraSaved = await newEmprendedora.save();
-        res.status(201).json({ message: "Emprendedora creada exitosamente", emprendedora: emprendedoraSaved });
+
+        await verificarMetasAlcanzadas(emprendedoraSaved);
+
+        const emprendedoraConMetas = await Emprendedoras.findById(emprendedoraSaved._id);
+        
+        res.status(201).json({ message: "Emprendedora creada exitosamente", emprendedora: emprendedoraConMetas });
     } catch (error) {
-        res.status(500).json({ message: "Error al crear la emprendedora" });
+        res.status(500).json({ message: "Error al crear la emprendedora", error });
     }
-}
+};
+
+
 
 export const getEmprendedoras = async (req, res) => {
     try {
@@ -56,6 +82,8 @@ export const updateEmprendedoraById = async (req, res) => {
         if (!updatedEmprendedora) {
             return res.status(404).json({ message: "Emprendedora no encontrada" });
         }
+        
+        // Verifica las metas alcanzadas para la emprendedora actualizada
         await verificarMetasAlcanzadas(updatedEmprendedora);
 
         res.status(200).json({ message: "Emprendedora actualizada correctamente", updatedEmprendedora });

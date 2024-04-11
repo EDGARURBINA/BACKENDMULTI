@@ -27,12 +27,16 @@ export const createCarrito = async  (req, res) =>{
         const carrito = await Cart.findById(req.params.carritoId)
         res.status(200).json(carrito)
       };
+
+
+      
       export const updateCarritoById = async (req , res) =>{
         const updateCarrito = await Cart. findByIdAndUpdate(req.params.carritoId, req.body,{
             new: true
         })
         res.status(200).json(updateCarrito)
       }
+
       export const deleteCarritoById = async (req, res) => {
         const { carritoId } = req.params;
         try {

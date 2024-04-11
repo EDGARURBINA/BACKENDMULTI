@@ -1,27 +1,19 @@
 import Product from "../models/Product"
 
 export const createProduct = async (req, res) => {
-    const { nombre, estilos, clave } = req.body;
-    const newEstilos = []
-    for (const estilo of estilos) {
-        estilo.claveStyle = `${clave}-${estilo.nombreStyle}`
-        newEstilos.push(estilo)
-    }
-    console.log(newEstilos);
+    const { nombre, clave, cantidad, tipo } = req.body;
     try {
-        const newProduct = new Product({
-            nombre,
-            estilos, 
-            clave 
-        });
-        
+        const newProduct =  new  Product ({nombre, clave, cantidad, tipo});
         const productSaved = await newProduct.save();
 
-        res.status(201).json(productSaved);
+        res.status(201).json({ message: "producto creado exitosamente", product: productSaved });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Error al crear el producto" });
+        
     }
 }
+
+
 
 export const getProducts = async (req, res) => {
     const products = await Product.find();

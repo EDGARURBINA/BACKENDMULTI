@@ -10,6 +10,7 @@ import carritoRoutes from "./routes/carrito.routes"
 import metaRoutes from "./routes/meta.routes"
 import pedidoRoutes from "./routes/pedidido.routes";
 import ticketRoutes from "./routes/ticket.routes"
+import estiloRoutes from "./routes/estilo.routes"
 
 
 
@@ -33,6 +34,7 @@ app.use("/api/carrito", carritoRoutes)
 app.use("/api/metas", metaRoutes)
 app.use("/api/pedidos",pedidoRoutes)
 app.use("/api/tickets",ticketRoutes)
+app.use("/api/estilos",estiloRoutes)
 
 
 
