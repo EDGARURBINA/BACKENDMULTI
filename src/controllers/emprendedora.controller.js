@@ -23,20 +23,11 @@ export const createEmprendedora = async (req, res) => {
             img,
             tips: [new Tip(tips[0])]
         });
-        try {
-            const emprendedoraSaved = await newEmprendedora.save();
-            console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
-        } catch (error) {
-            console.error('Error al guardar la Emprendedora:', error);
-            throw error; // Propaga el error para identificar la causa exacta
-        }
-
-        // await verificarMetasAlcanzadas(emprendedoraSaved);
-
-        // const emprendedoraConMetas = await Emprendedora.findById(emprendedoraSaved._id);
-
-        res.status(201).json({ message: "Emprendedora creada exitosamente", emprendedora: emprendedoraConMetas });
+        const emprendedoraSaved = await newEmprendedora.save();
+        console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
+        res.status(201).json({ message: "Emprendedora creada exitosamente", emprendedora: emprendedoraSaved });
     } catch (error) {
+        console.error('Error al guardar la Emprendedora:', error);
         res.status(500).json({ message: "Error al crear la emprendedora", error });
     }
 };
