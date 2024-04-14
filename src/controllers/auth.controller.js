@@ -35,16 +35,16 @@ export const singUp = async (req, res) => {
 export const singin = async (req, res) => {
     const userFound = await User.findOne({email: req.body.email}).populate("roles");
 
-    if(!userFound) return res.status(400).json({message:"user not found"})
+    if(!userFound) return res.json({error: true, message:"user not found"})
 
     const matchPassword = await  User.comparePassword(req.body.password, userFound.password)
 
-    if(!matchPassword) return res.status(401).json({token : null, mesasage: "contraseña incorrecta"})
+    if(!matchPassword) return res.json({error: true, message: "contraseña incorrecta"})
      
    const token =  jwt.sign({id: userFound._id}, config.SECRET,{
     expiresIn : 86400
-   })
+   }) 
  
     console.log(userFound)
-    res.json({token})
+    res.json({error: false, token:token})
 };

@@ -2,7 +2,7 @@
 import { Schema, model } from "mongoose";
 const emprendedoraSchema = new Schema({
 
-  nombre: {
+  nombres: {
     type: String,
     required: true
   },
@@ -11,10 +11,10 @@ const emprendedoraSchema = new Schema({
   required: true
   },
   numeroCliente: {
-    type: Number,
+    type: String,
     required: true
   },
-  ventaTotal:{
+  totalVenta:{
     type: Number,
     required: true
   },
@@ -25,8 +25,8 @@ const emprendedoraSchema = new Schema({
     type: String,
     required: true,
   },
-  tip: { type: Schema.Types.Object, ref: 'Tip' } 
+  tips: [ {type: Schema.Types.Object, ref: 'Tip', required: true } ]
 
 });
 
-export default model("Emprendedoras", emprendedoraSchema);
+export default model("Emprendedora", emprendedoraSchema);

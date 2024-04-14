@@ -1,8 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import { createRoles } from "./libs/inicialSetup";
-
-
+import cors from 'cors';
 import productsRoutes from "./routes/products.routes"
 import authRoutes from "./routes/auth.routes";
 import emprendedorasRoutes from "./routes/emprendedoras.routes";
@@ -13,9 +12,10 @@ import ticketRoutes from "./routes/ticket.routes"
 import estiloRoutes from "./routes/estilo.routes"
 
 
-
 const app = express()
+app.use(cors());
 createRoles();
+
 
 
 app.use(express.json());
@@ -25,7 +25,6 @@ app.use(morgan("dev"));
 app.get("/", (req, res) => {
     res.json("welcome")
 })
-
 
 app.use("/api/products", productsRoutes)
 app.use("/api/auth", authRoutes)
