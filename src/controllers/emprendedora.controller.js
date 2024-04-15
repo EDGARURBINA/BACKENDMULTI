@@ -1,6 +1,7 @@
 import Emprendedora from "../models/Emprendedora"
 import Meta from "../models/Meta";
 import Tip from "../models/Tip";
+import { postImageEntrepreneur } from "./uploadImg";
 
 
 export const createEmprendedora = async (req, res) => {
@@ -14,7 +15,8 @@ export const createEmprendedora = async (req, res) => {
                 return newTip;
             })
         );
-        console.log(validatedTips);
+        const url = typeof img === "string" ? img : await postImageEntrepreneur(img);
+        console.log(url);
         const newEmprendedora = new Emprendedora({
             nombres,
             apellidos,
