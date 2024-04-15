@@ -10,9 +10,7 @@ router.post("/", [authJwt.verifyToken, authJwt.isAdmin], emprenderodorasCtrl.cre
 
 router.get("/", emprenderodorasCtrl.getEmprendedoras)
 
-router.get("/:emprendedorasId", [authJwt.verifyToken, authJwt.isAdmin],emprenderodorasCtrl.getEmprendedoraById)
-
-router.put("/:emprendedorasId", [authJwt.verifyToken, authJwt.isAdmin],emprenderodorasCtrl.updateEmprendedoraById)
+router.put("/:numeroCliente", [authJwt.verifyToken, authJwt.isAdmin],emprenderodorasCtrl.updateEmprendedoraByNumeroCliente)
 
 router.delete("/:emprendedorasId", [authJwt.verifyToken, authJwt.isAdmin, emprendedorasLimiter],emprenderodorasCtrl.deleteEmprendedoraById)
  

@@ -6,38 +6,29 @@ import Tip from "../models/Tip";
 export const createEmprendedora = async (req, res) => {
     const { nombres, numeroCliente, apellidos, tips, totalVenta, img } = req.body;
     try {
-        const currentDate = new Date();
-        const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
-        const differenceMs = currentDate - firstDayOfYear;
-        const daysElapsed = Math.floor(differenceMs / (1000 * 60 * 60 * 24)) + 1;
-        let tipActual = 0;
-        for (let numeroTip = 21; numeroTip < daysElapsed; numeroTip += 21) {
-            tipActual += 1;
-        }
-        console.log(totalVenta);
+        const validatedTips = await Promise.all(
+            tips.map(async tipData => {
+                const { tip, semana1, semana2, semana3 } = tipData;
+                const newTip = new Tip({ tip, semana1, semana2, semana3 });
+                await newTip.validate(); 
+                return newTip;
+            })
+        );
+        console.log(validatedTips);
         const newEmprendedora = new Emprendedora({
             nombres,
+            apellidos,
             numeroCliente,
             totalVenta,
-            apellidos,
             img,
-            tips: [new Tip(tips[0])]
+            tips: validatedTips 
         });
-        try {
-            const emprendedoraSaved = await newEmprendedora.save();
-            console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
-        } catch (error) {
-            console.error('Error al guardar la Emprendedora:', error);
-            throw error; // Propaga el error para identificar la causa exacta
-        }
-
-        // await verificarMetasAlcanzadas(emprendedoraSaved);
-
-        // const emprendedoraConMetas = await Emprendedora.findById(emprendedoraSaved._id);
-
-        res.status(201).json({ message: "Emprendedora creada exitosamente", emprendedora: emprendedoraConMetas });
+        const emprendedoraSaved = await newEmprendedora.save();
+        console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
+        res.status(201).json({ message: 'Emprendedora guardada correctamente', emprendedora: emprendedoraSaved });
     } catch (error) {
-        res.status(500).json({ message: "Error al crear la emprendedora", error });
+        console.error('Error al guardar la Emprendedora:', error);
+        res.status(500).json({ message: 'Error al crear la emprendedora', error });
     }
 };
 
@@ -45,19 +36,19 @@ export const createEmprendedora = async (req, res) => {
 
 export const getEmprendedoras = async (req, res) => {
     try {
-        const verEmprendedoras = await Emprendedora.find().sort({ _id: 1 });
+        const verEmprendedoras = await Emprendedora.find().sort({ totalVenta: 1 });
         res.json(verEmprendedoras);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Error al obtener las emprendedoras' });
-    }
+    } 
 };
 
 export const getEmprendedoraById = async (req, res) => {
     const emprendedoras = await Emprendedora.findById(req.params.emprendedorasId)
     res.status(200).json(emprendedoras)
 }
-
+ 
 async function verificarMetasAlcanzadas(emprendedora) {
     try {
         const metas = await Meta.find();
@@ -75,11 +66,12 @@ async function verificarMetasAlcanzadas(emprendedora) {
     }
 }
 
-export const updateEmprendedoraById = async (req, res) => {
-    const { emprendedorasId } = req.params;
+export const updateEmprendedoraByNumeroCliente = async (req, res) => {
+    const { numeroCliente } = req.params;
     try {
-        const updatedEmprendedora = await Emprendedoras.findByIdAndUpdate(
-            emprendedorasId,
+        console.log(numeroCliente);
+        const updatedEmprendedora = await Emprendedora.findOneAndUpdate(
+            { numeroCliente: numeroCliente},
             req.body,
             { new: true }
         );
@@ -87,8 +79,7 @@ export const updateEmprendedoraById = async (req, res) => {
             return res.status(404).json({ message: "Emprendedora no encontrada" });
         }
 
-        // Verifica las metas alcanzadas para la emprendedora actualizada
-        await verificarMetasAlcanzadas(updatedEmprendedora);
+        // await verificarMetasAlcanzadas(updatedEmprendedora);
 
         res.status(200).json({ message: "Emprendedora actualizada correctamente", updatedEmprendedora });
     } catch (error) {

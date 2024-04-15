@@ -25,7 +25,7 @@ const emprendedoraSchema = new Schema({
     type: String,
     required: true,
   },
-  tips: [ {type: Schema.Types.Object, ref: 'Tip', required: true } ]
+  tips: [{ type: Schema.Types.Object, required: true }]
 
 });
 
