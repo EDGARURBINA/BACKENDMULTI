@@ -6,9 +6,9 @@ import { postImageEntrepreneur } from "./uploadImg";
 
 
 export const createEmprendedora = async (req, res) => {
+    console.log(req.body)
     const { nombres, numeroCliente, apellidos, tip, semana1, semana2, semana3, totalVenta } = req.body;
     try {
-        res.json(req.body);
         const parseTips = [{
             tip: parseInt(tip),
             semana1: parseInt(semana1), 
@@ -26,7 +26,7 @@ export const createEmprendedora = async (req, res) => {
             totalVenta: parseInt(totalVenta),
             tips: parseTips,
             img: url
-        });
+        }); 
         const emprendedoraSaved = await newEmprendedora.save();
         console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
         res.status(201).json({ message: "Emprendedora creada correctamente.", emprendedora: emprendedoraSaved});

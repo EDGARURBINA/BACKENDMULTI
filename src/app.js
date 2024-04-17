@@ -12,7 +12,12 @@ import ticketRoutes from "./routes/ticket.routes"
 import estiloRoutes from "./routes/estilo.routes"
 
 const app = express()
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: 'GET,PUT,PATCH,POST,DELETE', 
+    allowedHeaders: 'Content-Type, Authorization, token', 
+    credentials: true 
+  }));
 createRoles();
 
 app.use(express.json());

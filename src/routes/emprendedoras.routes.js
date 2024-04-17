@@ -27,7 +27,7 @@ const upload = multer({
   },
 });
 
-router.post("/", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img"), validateImgField] , emprenderodorasCtrl.createEmprendedora)
+router.post("/", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")] , emprenderodorasCtrl.createEmprendedora)
 
 router.get("/", emprenderodorasCtrl.getEmprendedoras)
 

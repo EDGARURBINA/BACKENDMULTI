@@ -1,6 +1,6 @@
 export function validateImgField(req, res, next) {
     const { img } = req.body;
-  
+    console.log(req.body)
     if (typeof img === 'string') {
       next();
     } else if (req.file) {
@@ -10,7 +10,7 @@ export function validateImgField(req, res, next) {
       }
       next();
     } else {
-      return res.status(400).json({ message: 'El campo "img" debe ser una URL de imagen o un archivo de imagen' });
+      return res.status(400).json({ message: 'El campo "img" debe ser una URL de imagen o un archivo de imagen', img: img });
     }
   }
   
