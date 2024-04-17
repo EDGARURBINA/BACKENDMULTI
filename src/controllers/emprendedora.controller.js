@@ -6,24 +6,26 @@ import { postImageEntrepreneur } from "./uploadImg";
 
 
 export const createEmprendedora = async (req, res) => {
-    const { nombres, numeroCliente, apellidos, tip, semana1, semana2, semana3, totalVenta} = req.body;
+    const { nombres, numeroCliente, apellidos, tip, semana1, semana2, semana3, totalVenta } = req.body;
     try {
+        res.json(req.body);
         const parseTips = [{
             tip: parseInt(tip),
             semana1: parseInt(semana1), 
             semana2: parseInt(semana2),
             semana3: parseInt(semana3)
         }]
-        console.log(req.file);
         let url = req.file ? await postImageEntrepreneur(req.file, numeroCliente) : req.body.img;
-        url = `https://drive.google.com/uc??export=download&id=${url.id}`
+        if (req.file) {
+            url = `https://drive.google.com/uc?export=view&id=${url.id}`
+        }
         const newEmprendedora = new Emprendedora({
-            nombres,
-            apellidos,
-            numeroCliente,
+            nombres:nombres,
+            apellidos: apellidos,
+            numeroCliente: numeroCliente,
             totalVenta: parseInt(totalVenta),
-            img: url,
-            tips: parseTips 
+            tips: parseTips,
+            img: url
         });
         const emprendedoraSaved = await newEmprendedora.save();
         console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
@@ -91,10 +93,10 @@ export const updateEmprendedoraByNumeroCliente = async (req, res) => {
 };
 
 
-export const deleteEmprendedoraById = async (req, res) => {
-    const { emprendedorasId } = req.params;
+export const deleteEmprendedoraByNumeroCliente = async (req, res) => {
+    const { numeroCliente } = req.params;
     try {
-        const emprendedoraEliminada = await Emprendedoras.findByIdAndDelete(emprendedorasId);
+        const emprendedoraEliminada = await Emprendedora.findOneAndDelete(numeroCliente);
         if (!emprendedoraEliminada) {
             return res.status(404).json({ message: "Emprendedora no encontrada" });
         }

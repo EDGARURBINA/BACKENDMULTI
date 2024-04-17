@@ -5,6 +5,7 @@ import *as emprenderodorasCtrl from "../controllers/emprendedora.controller"
 import { emprendedorasLimiter } from "../middlewares/rateLimitMiddleware";
 
 import { authJwt } from "../middlewares";
+import { validateImgField } from "../middlewares/authImg";
 const multer = require('multer');
 const path = require('path');
 const mime = require('mime-types');
@@ -21,18 +22,18 @@ const upload = multer({
     if (allowedMimes.includes(file.mimetype)) {
       callback(null, true);
     } else {
-      callback(new Error('Solo se permiten archivos JPEG, PNG o  JPG')); 
+      callback(new Error('Solo se permiten archivos JPEG, PNG o JPG')); 
     }
   },
 });
 
-router.post("/", [authJwt.verifyToken, authJwt.isAdmin], upload.single("img") , emprenderodorasCtrl.createEmprendedora)
+router.post("/", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img"), validateImgField] , emprenderodorasCtrl.createEmprendedora)
 
 router.get("/", emprenderodorasCtrl.getEmprendedoras)
 
-router.put("/:numeroCliente", [authJwt.verifyToken, authJwt.isAdmin],emprenderodorasCtrl.updateEmprendedoraByNumeroCliente)
+router.put("/:numeroCliente", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")], emprenderodorasCtrl.updateEmprendedoraByNumeroCliente)
 
-router.delete("/:emprendedorasId", [authJwt.verifyToken, authJwt.isAdmin, emprendedorasLimiter],emprenderodorasCtrl.deleteEmprendedoraById)
+router.delete("/:numeroCliente", [authJwt.verifyToken, authJwt.isAdmin, emprendedorasLimiter],emprenderodorasCtrl.deleteEmprendedoraByNumeroCliente)
  
 
 export default router;
