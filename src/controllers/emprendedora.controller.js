@@ -1,3 +1,4 @@
+import { clouddebugger } from "googleapis/build/src/apis/clouddebugger";
 import Emprendedora from "../models/Emprendedora"
 import Meta from "../models/Meta";
 import Tip from "../models/Tip";
@@ -5,29 +6,28 @@ import { postImageEntrepreneur } from "./uploadImg";
 
 
 export const createEmprendedora = async (req, res) => {
-    const { nombres, numeroCliente, apellidos, tips, totalVenta, img } = req.body;
+    const { nombres, numeroCliente, apellidos, tip, semana1, semana2, semana3, totalVenta} = req.body;
     try {
-        const validatedTips = await Promise.all(
-            tips.map(async tipData => {
-                const { tip, semana1, semana2, semana3 } = tipData;
-                const newTip = new Tip({ tip, semana1, semana2, semana3 });
-                await newTip.validate(); 
-                return newTip;
-            })
-        );
-        const url = typeof img === "string" ? img : await postImageEntrepreneur(img);
-        console.log(url);
+        const parseTips = [{
+            tip: parseInt(tip),
+            semana1: parseInt(semana1), 
+            semana2: parseInt(semana2),
+            semana3: parseInt(semana3)
+        }]
+        console.log(req.file);
+        let url = req.file ? await postImageEntrepreneur(req.file, numeroCliente) : req.body.img;
+        url = `https://drive.google.com/uc??export=download&id=${url.id}`
         const newEmprendedora = new Emprendedora({
             nombres,
             apellidos,
             numeroCliente,
-            totalVenta,
-            img,
-            tips: validatedTips 
+            totalVenta: parseInt(totalVenta),
+            img: url,
+            tips: parseTips 
         });
         const emprendedoraSaved = await newEmprendedora.save();
         console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
-        res.status(201).json({ message: 'Emprendedora guardada correctamente', emprendedora: emprendedoraSaved });
+        res.status(201).json({ message: "Emprendedora creada correctamente.", emprendedora: emprendedoraSaved});
     } catch (error) {
         console.error('Error al guardar la Emprendedora:', error);
         res.status(500).json({ message: 'Error al crear la emprendedora', error });

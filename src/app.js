@@ -11,12 +11,9 @@ import pedidoRoutes from "./routes/pedidido.routes";
 import ticketRoutes from "./routes/ticket.routes"
 import estiloRoutes from "./routes/estilo.routes"
 
-
 const app = express()
 app.use(cors());
 createRoles();
-
-
 
 app.use(express.json());
 app.use(morgan("dev"));

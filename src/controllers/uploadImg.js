@@ -1,57 +1,102 @@
-import path from "path";
-import { google } from "googleapis";
-import  stream  from "stream";
-import dotenv from "dotenv"
+const path = require("path");
+const { google } = require("googleapis");
+const stream = require("stream");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
-export const getPrueba = async (req, res)=> {
-  return res.status(200).send("Root de /upload");
-}
 
+// Función para manejar la subida de imágenes de productos
+const postImageProduct = async (req, res) => {
+  try {
+    const url = await uploadFile(req.file, process.env.IdFolderProducts);
+    if (url) {
+      res.status(200).json({ message: url });
+    } else {
+      res.status(404).json({ message: "No se pudo subir la imagen del producto." });
+    }
+  } catch (error) {
+    console.error("Error al subir imagen del producto:", error);
+    res.status(500).json({ message: "Error al subir imagen del producto.", error: error });
+  }
+};
 
-export const postImageProduct = async (file)=>{
-  return await uploadFile(file, `${process.env.IdFolderProducts}`);
+// Función para manejar la subida de imágenes de emprendedores
+const postImageEntrepreneur = async (file, numeroCliente) => {
+  try {
+    const url = await uploadFile(file, process.env.IdFolderEntrepreneurs, numeroCliente);
+    if (url) {
+      return url;
+    } else {
+      return url;
+    }
+  } catch (error) {
+    console.error("Error al subir imagen del emprendedor:", error);
+    return error;
+  }
+};
 
-}
+const uploadFile = async (fileObject, folderId, name) => {
+  try {
+    const { fieldname, originalname, mimetype, buffer } = fileObject;
 
-export const postImageEntrepreneur = async (file)=>{
-  return await uploadFile(file, `${process.env.IdFolderEntrepreneurs}`);
-}
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(buffer);
 
-const uploadFile = async (fileObject, folder) => {
-  const folderId = folder;
-  const bufferStream = new  stream.PassThrough();
-  bufferStream.end(fileObject.file.data);
-  const drive = await getDriveService();
-  const { data } = await drive.files.create({
-    resource: {  
-      name: fileObject.file.name,
-      parents: [folderId],
-    },
-    media: {
-      mimeType: fileObject.file.mimeType,
-      body: bufferStream,
-    },
-    fields: "id,name,webViewLink",
-  });
-  return data || null;
+    const drive = await getDriveService();
+    const existingFiles = await drive.files.list({
+      q: `'${folderId}' in parents and name='${name}' and trashed=false`,
+      fields: 'files(id)',
+    });
+
+    if (existingFiles.data.files.length > 0) {
+      const fileId = existingFiles.data.files[0].id;
+      await drive.files.delete({ fileId });
+    }
+
+    const { data } = await drive.files.create({
+      resource: {
+        name: name,
+        parents: [folderId],
+      },
+      media: {
+        mimeType: mimetype,
+        body: bufferStream,
+      },
+      fields: "id,name,webViewLink",
+    });
+
+    return data;
+  } catch (error) {
+    console.error("Error al subir archivo a Google Drive:", error);
+    throw new Error("Error al subir archivo a Google Drive.");
+  }
 };
 
 
+
+// Función para obtener el servicio de Google Drive
 const getDriveService = async () => {
-  const KEYFILEPATH = path.join(
-    __dirname,
-    "bdimages-35380-7ff54c901789.json"
-  );
-  const SCOPES = ["https://www.googleapis.com/auth/drive"];
+  try {
+    const KEYFILEPATH = path.join(__dirname, "bdimages-35380-7ff54c901789.json");
+    const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
 
-  const auth = new google.auth.GoogleAuth({
-    keyFile: KEYFILEPATH,
-    scopes: SCOPES,
-  });
-  const authClient = await auth.getClient();
-  const driveService = google.drive({ version: "v3", auth: authClient });
-  return driveService;
+    const auth = new google.auth.GoogleAuth({
+      keyFile: KEYFILEPATH,
+      scopes: SCOPES,
+    });
+
+    const authClient = await auth.getClient();
+    const driveService = google.drive({ version: "v3", auth: authClient });
+
+    return driveService;
+  } catch (error) {
+    console.error("Error al obtener servicio de Google Drive:", error);
+    throw new Error("Error al obtener servicio de Google Drive.");
+  }
 };
 
+module.exports = {
+  postImageProduct,
+  postImageEntrepreneur,
+};
