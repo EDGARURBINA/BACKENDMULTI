@@ -7,36 +7,25 @@ dotenv.config();
 
 
 // Función para manejar la subida de imágenes de productos
-const postImageProduct = async (req, res) => {
+const postImageProduct = async (file, oldClave, newClave) => {
   try {
-    const url = await uploadFile(req.file, process.env.IdFolderProducts);
-    if (url) {
-      res.status(200).json({ message: url });
-    } else {
-      res.status(404).json({ message: "No se pudo subir la imagen del producto." });
-    }
+    return await uploadFile(file, process.env.IdFolderProducts, oldClave, newClave);
   } catch (error) {
-    console.error("Error al subir imagen del producto:", error);
-    res.status(500).json({ message: "Error al subir imagen del producto.", error: error });
+    console.error("Error al subir imagen del estilo:", error);
+    return error;
   }
 };
-
 // Función para manejar la subida de imágenes de emprendedores
-const postImageEntrepreneur = async (file, numeroCliente) => {
+const postImageEntrepreneur = async (file, oldNumeroCliente, newNumeroCliente) => {
   try {
-    const url = await uploadFile(file, process.env.IdFolderEntrepreneurs, numeroCliente);
-    if (url) {
-      return url;
-    } else {
-      return url;
-    }
+    return await uploadFile(file, process.env.IdFolderEntrepreneurs, oldNumeroCliente, newNumeroCliente);
   } catch (error) {
     console.error("Error al subir imagen del emprendedor:", error);
     return error;
   }
 };
 
-const uploadFile = async (fileObject, folderId, name) => {
+const uploadFile = async (fileObject, folderId, oldName, newName) => {
   try {
     const { fieldname, originalname, mimetype, buffer } = fileObject;
 
@@ -45,7 +34,7 @@ const uploadFile = async (fileObject, folderId, name) => {
 
     const drive = await getDriveService();
     const existingFiles = await drive.files.list({
-      q: `'${folderId}' in parents and name='${name}' and trashed=false`,
+      q: `'${folderId}' in parents and name='${oldName}' and trashed=false`,
       fields: 'files(id)',
     });
 
@@ -56,7 +45,7 @@ const uploadFile = async (fileObject, folderId, name) => {
 
     const { data } = await drive.files.create({
       resource: {
-        name: name,
+        name: newName,
         parents: [folderId],
       },
       media: {
