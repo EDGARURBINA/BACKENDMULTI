@@ -4,11 +4,14 @@ export const createProduct = async (req, res) => {
     const { nombre, clave, cantidad, tipo } = req.body;
     try {
         const newProduct =  new  Product ({nombre, clave, cantidad, tipo});
-        const productSaved = await newProduct.save();
-
-        res.status(201).json({ message: "producto creado exitosamente", product: productSaved });
+        if (await Product.findOne({ clave: clave })) {
+            res.status(200).json({ existe: true, error: false, message: `Producto con clave: ${clave} ya esta agregado.` });
+        } else {
+            await newProduct.save();
+            res.status(201).json({ existe: false, error: false, message: "producto creado exitosamente"});
+        }
     } catch (error) {
-        res.status(500).json({ message: "Error al crear el producto" });
+        res.status(500).json({ message: `Error al crear el producto: ${error}` });
         
     }
 }
@@ -16,31 +19,49 @@ export const createProduct = async (req, res) => {
 
 
 export const getProducts = async (req, res) => {
-    const products = await Product.find();
-    res.json(products)
-}
-
-export const getProducById = async (req, res) => {
-    const product = await Product.findById(req.params.productId);
-    res.status(200).json(product)
-
-}
-
-export const updateProductById = async (req, res) => {
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.productId, req.body, {
-        new: true
-    })
-    res.status(200).json(updatedProduct)
-}
-
-export const deleteProductById = async (req, res) => {
-    const { productId } = req.params;
     try {
-        await Product.findByIdAndDelete(productId);
-        res.status(204).end();
+        const products = await Product.find();
+        res.status(200).json(products)
+    } catch (error) {
+        res.json(error)
+    }
+}
+
+
+export const updateProductByClave = async (req, res) => {
+    const { Clave } = req.params;
+    const { nombre, clave, cantidad, tipo } = req.body;
+    try {
+        if (Clave === clave) {
+            await Product.findOneAndUpdate(
+                { clave: clave },
+                req.body,
+                { new: true }
+            );
+            res.status(200).json({ existe: false, error: false, message: "Producto actualizado correctamente." });
+        } else if (await Product.findOne({ clave: clave })) {
+            res.status(200).json({ existe: true, error: false, message: `Producto con clave: ${clave} ya esta agregado.` });
+        } else {
+            await Product.findOneAndUpdate(
+                { clave: Clave },
+                req.body,
+                { new: true }
+            );
+            res.status(200).json({ existe: false, error: false, message: "Producto actualizado correctamente." });
+        }
+    } catch (error) {
+        res.status(500).json({ error: true, message: `Error al modificar el  producto: ${error}` });
+    }
+}
+
+export const deleteProductByClave = async (req, res) => {
+    const { Clave } = req.params;
+    try {
+        await Product.findOneAndDelete({clave: Clave});
+        res.status(200).json({ error: false, message: "Producto eliminado correctamente." });
     } catch (error) {
         console.error("Error deleting product:", error);
-        res.status(500).json({ message: "Error al eliminar el producto" });
+        res.status(500).json({ error: true, message: `Error al eliminar el producto: ${error}` });
     }
 }
 

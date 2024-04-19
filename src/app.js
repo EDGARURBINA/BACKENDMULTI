@@ -9,7 +9,7 @@ import carritoRoutes from "./routes/carrito.routes"
 import metaRoutes from "./routes/meta.routes"
 import pedidoRoutes from "./routes/pedidido.routes";
 import ticketRoutes from "./routes/ticket.routes"
-import estiloRoutes from "./routes/estilo.routes"
+import estiloRoutes from "./routes/estilos.routes"
 
 const app = express()
 app.use(cors({

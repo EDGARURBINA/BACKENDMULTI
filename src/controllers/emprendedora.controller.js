@@ -6,33 +6,37 @@ import { postImageEntrepreneur } from "./uploadImg";
 
 
 export const createEmprendedora = async (req, res) => {
-    console.log(req.body)
     const { nombres, numeroCliente, apellidos, tip, semana1, semana2, semana3, totalVenta } = req.body;
     try {
         const parseTips = [{
             tip: parseInt(tip),
-            semana1: parseInt(semana1), 
+            semana1: parseInt(semana1),
             semana2: parseInt(semana2),
             semana3: parseInt(semana3)
         }]
-        let url = req.file ? await postImageEntrepreneur(req.file, numeroCliente) : req.body.img;
+        let url = req.file ? await postImageEntrepreneur(req.file, numeroCliente, numeroCliente) : req.body.img;
         if (req.file) {
             url = `https://drive.google.com/uc?export=view&id=${url.id}`
         }
         const newEmprendedora = new Emprendedora({
-            nombres:nombres,
+            nombres: nombres,
             apellidos: apellidos,
             numeroCliente: numeroCliente,
             totalVenta: parseInt(totalVenta),
             tips: parseTips,
             img: url
-        }); 
-        const emprendedoraSaved = await newEmprendedora.save();
-        console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
-        res.status(201).json({ message: "Emprendedora creada correctamente.", emprendedora: emprendedoraSaved});
+        });
+        if (await Emprendedora.findOne({ numeroCliente: numeroCliente })) {
+            res.status(200).json({ existe: true, error: false, message: `Emprendedora con numero de cliente: ${numeroCliente} ya esta agregada.` });
+        } else {
+            const emprendedoraSaved = await newEmprendedora.save();
+            console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
+            res.status(201).json({ existe: false, error: false, message: "Emprendedora creada correctamente.", emprendedora: emprendedoraSaved });
+        }
     } catch (error) {
+
         console.error('Error al guardar la Emprendedora:', error);
-        res.status(500).json({ message: 'Error al crear la emprendedora', error });
+        res.status(500).json({ message: 'Error al crear la emprendedora', error, error: true, });
     }
 };
 
@@ -41,18 +45,18 @@ export const createEmprendedora = async (req, res) => {
 export const getEmprendedoras = async (req, res) => {
     try {
         const verEmprendedoras = await Emprendedora.find().sort({ totalVenta: 1 });
-        res.json(verEmprendedoras);
+        res.status(200).json(verEmprendedoras);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Error al obtener las emprendedoras' });
-    } 
+    }
 };
 
 export const getEmprendedoraById = async (req, res) => {
     const emprendedoras = await Emprendedora.findById(req.params.emprendedorasId)
     res.status(200).json(emprendedoras)
 }
- 
+
 async function verificarMetasAlcanzadas(emprendedora) {
     try {
         const metas = await Meta.find();
@@ -71,21 +75,35 @@ async function verificarMetasAlcanzadas(emprendedora) {
 }
 
 export const updateEmprendedoraByNumeroCliente = async (req, res) => {
-    const { numeroCliente } = req.params;
+    const { NumeroCliente } = req.params;
+    const { nombres, numeroCliente, apellidos, tip, tips, semana1, semana2, semana3, totalVenta } = req.body;
     try {
-        console.log(numeroCliente);
+        console.log(NumeroCliente);
+        const parseTips = {
+            tip: parseInt(tip),
+            semana1: parseInt(semana1),
+            semana2: parseInt(semana2),
+            semana3: parseInt(semana3)
+        }
+        const newTips = JSON.parse(tips);
+        newTips.push(parseTips);
+        let url = req.file ? await postImageEntrepreneur(req.file, NumeroCliente, numeroCliente) : req.body.img;
+        if (req.file) {
+            url = `https://drive.google.com/uc?export=view&id=${url.id}`
+        }
         const updatedEmprendedora = await Emprendedora.findOneAndUpdate(
-            { numeroCliente: numeroCliente},
-            req.body,
+            { numeroCliente: NumeroCliente },
+            {
+                nombres: nombres,
+                apellidos: apellidos,
+                numeroCliente: numeroCliente,
+                totalVenta: parseInt(totalVenta),
+                tips: newTips,
+                img: url
+            },
             { new: true }
         );
-        if (!updatedEmprendedora) {
-            return res.status(404).json({ message: "Emprendedora no encontrada" });
-        }
-
-        // await verificarMetasAlcanzadas(updatedEmprendedora);
-
-        res.status(200).json({ message: "Emprendedora actualizada correctamente", updatedEmprendedora });
+        res.status(200).json({ message: "Emprendedora actualizada correctamente", updatedEmprendedora: updatedEmprendedora });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al actualizar la emprendedora" });
@@ -96,12 +114,9 @@ export const updateEmprendedoraByNumeroCliente = async (req, res) => {
 export const deleteEmprendedoraByNumeroCliente = async (req, res) => {
     const { numeroCliente } = req.params;
     try {
-        const emprendedoraEliminada = await Emprendedora.findOneAndDelete(numeroCliente);
-        if (!emprendedoraEliminada) {
-            return res.status(404).json({ message: "Emprendedora no encontrada" });
-        }
-        res.status(204).json({ message: "Emprendedora eliminada exitosamente" });
+        await Emprendedora.findOneAndDelete({ numeroCliente: numeroCliente });
+        res.status(200).json({ error: false, message: `Emprendedora eliminada exitosamente.` });
     } catch (error) {
-        res.status(500).json({ message: "Error al eliminar la emprendedora" });
+        res.status(500).json({ error: true, message: `Error al eliminar la emprendedora ${error}` });
     }
 }

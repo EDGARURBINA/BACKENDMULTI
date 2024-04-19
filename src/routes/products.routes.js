@@ -8,12 +8,10 @@ import { productLimiter } from "../middlewares/rateLimitMiddleware";
 
 router.post("/", [authJwt.verifyToken, authJwt.isAdmin], productsCtrl.createProduct)
 
-router.get("/", productLimiter, productsCtrl.getProducts)
+router.get("/", productsCtrl.getProducts)
 
-router.get("/:productId", productsCtrl.getProducById)
+router.put("/:Clave", [authJwt.verifyToken, authJwt.isAdmin],productsCtrl.updateProductByClave)
 
-router.put("/:productId", [authJwt.verifyToken, authJwt.isAdmin,productLimiter],productsCtrl.updateProductById)
-
-router.delete("/:productId", [authJwt.verifyToken, authJwt.isAdmin, productLimiter], productsCtrl.deleteProductById)
+router.delete("/:Clave", [authJwt.verifyToken, authJwt.isAdmin], productsCtrl.deleteProductByClave)
 
 export default router;

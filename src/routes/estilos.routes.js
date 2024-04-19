@@ -1,11 +1,10 @@
 import { Router } from "express";
 
 const router = Router()
-import *as emprenderodorasCtrl from "../controllers/emprendedora.controller"
+import *as estilosCtrl from "../controllers/estilos.controller"
 import { emprendedorasLimiter } from "../middlewares/rateLimitMiddleware";
 
 import { authJwt } from "../middlewares";
-import { validateImgField } from "../middlewares/authImg";
 const multer = require('multer');
 const path = require('path');
 const mime = require('mime-types');
@@ -27,13 +26,13 @@ const upload = multer({
   },
 });
 
-router.post("/", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")] , emprenderodorasCtrl.createEmprendedora)
+router.post("/", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")] , estilosCtrl.createEstilo)
 
-router.get("/", emprenderodorasCtrl.getEmprendedoras)
+router.get("/", estilosCtrl.getEstilos)
 
-router.put("/:NumeroCliente", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")], emprenderodorasCtrl.updateEmprendedoraByNumeroCliente)
+router.put("/:Clave", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")], estilosCtrl.updateEstiloByClave)
 
-router.delete("/:numeroCliente", [authJwt.verifyToken, authJwt.isAdmin],emprenderodorasCtrl.deleteEmprendedoraByNumeroCliente)
+router.delete("/:Clave", [authJwt.verifyToken, authJwt.isAdmin], estilosCtrl.deleteEstiloByClave)
  
 
 export default router;

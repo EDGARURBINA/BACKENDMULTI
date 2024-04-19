@@ -6,7 +6,7 @@ const productSchema = new Schema({
     required: true
   },
   clave: {
-    type: Number, 
+    type: String, 
     required: true,
     unique: true 
   },
@@ -18,7 +18,6 @@ const productSchema = new Schema({
     type: String,
     required: true
   }
-  
 });
 
 export default model("Product", productSchema);
