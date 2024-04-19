@@ -2,7 +2,7 @@ import { clouddebugger } from "googleapis/build/src/apis/clouddebugger";
 import Emprendedora from "../models/Emprendedora"
 import Meta from "../models/Meta";
 import Tip from "../models/Tip";
-import { postImageEntrepreneur } from "./uploadImg";
+import { deleteImageEntrepreneur, uploadImageEntrepreneur } from "./uploadImg";
 
 
 export const createEmprendedora = async (req, res) => {
@@ -14,21 +14,18 @@ export const createEmprendedora = async (req, res) => {
             semana2: parseInt(semana2),
             semana3: parseInt(semana3)
         }]
-        let url = req.file ? await postImageEntrepreneur(req.file, numeroCliente, numeroCliente) : req.body.img;
-        if (req.file) {
-            url = `https://drive.google.com/uc?export=view&id=${url.id}`
-        }
-        const newEmprendedora = new Emprendedora({
-            nombres: nombres,
-            apellidos: apellidos,
-            numeroCliente: numeroCliente,
-            totalVenta: parseInt(totalVenta),
-            tips: parseTips,
-            img: url
-        });
         if (await Emprendedora.findOne({ numeroCliente: numeroCliente })) {
             res.status(200).json({ existe: true, error: false, message: `Emprendedora con numero de cliente: ${numeroCliente} ya esta agregada.` });
         } else {
+            let url = req.file ? await uploadImageEntrepreneur(req.file, numeroCliente, numeroCliente) : req.body.img;
+            const newEmprendedora = new Emprendedora({
+                nombres: nombres,
+                apellidos: apellidos,
+                numeroCliente: numeroCliente,
+                totalVenta: parseInt(totalVenta),
+                tips: parseTips,
+                img: url
+            });
             const emprendedoraSaved = await newEmprendedora.save();
             console.log('Emprendedora guardada correctamente:', emprendedoraSaved);
             res.status(201).json({ existe: false, error: false, message: "Emprendedora creada correctamente.", emprendedora: emprendedoraSaved });
@@ -87,7 +84,7 @@ export const updateEmprendedoraByNumeroCliente = async (req, res) => {
         }
         const newTips = JSON.parse(tips);
         newTips.push(parseTips);
-        let url = req.file ? await postImageEntrepreneur(req.file, NumeroCliente, numeroCliente) : req.body.img;
+        let url = req.file ? await uploadImageEntrepreneur(req.file, NumeroCliente, numeroCliente) : req.body.img;
         if (req.file) {
             url = `https://drive.google.com/uc?export=view&id=${url.id}`
         }
@@ -115,6 +112,7 @@ export const deleteEmprendedoraByNumeroCliente = async (req, res) => {
     const { numeroCliente } = req.params;
     try {
         await Emprendedora.findOneAndDelete({ numeroCliente: numeroCliente });
+        await deleteImageEntrepreneur(numeroCliente);
         res.status(200).json({ error: false, message: `Emprendedora eliminada exitosamente.` });
     } catch (error) {
         res.status(500).json({ error: true, message: `Error al eliminar la emprendedora ${error}` });
