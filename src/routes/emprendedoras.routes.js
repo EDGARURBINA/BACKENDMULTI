@@ -31,10 +31,12 @@ router.post("/", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")] , 
 
 router.get("/", emprenderodorasCtrl.getEmprendedoras)
 
+router.get("/:NumeroCliente", emprenderodorasCtrl.getEmprendedoraByNumeroCliente)
+
 router.put("/:NumeroCliente", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")], emprenderodorasCtrl.updateEmprendedoraByNumeroCliente)
 
 router.delete("/:numeroCliente", [authJwt.verifyToken, authJwt.isAdmin],emprenderodorasCtrl.deleteEmprendedoraByNumeroCliente)
- 
+  
 
 export default router;
 

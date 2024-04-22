@@ -1,18 +1,21 @@
+import { deleteImage } from "../middlewares/uploadImg";
+import Estilo from "../models/Estilo";
 import Product from "../models/Product"
+const folder = 'imgsStyle';
 
 export const createProduct = async (req, res) => {
     const { nombre, clave, cantidad, tipo } = req.body;
     try {
-        const newProduct =  new  Product ({nombre, clave, cantidad, tipo});
+        const newProduct = new Product({ nombre, clave, cantidad, tipo });
         if (await Product.findOne({ clave: clave })) {
             res.status(200).json({ existe: true, error: false, message: `Producto con clave: ${clave} ya esta agregado.` });
         } else {
             await newProduct.save();
-            res.status(201).json({ existe: false, error: false, message: "producto creado exitosamente"});
+            res.status(201).json({ existe: false, error: false, message: "producto creado exitosamente" });
         }
     } catch (error) {
         res.status(500).json({ message: `Error al crear el producto: ${error}` });
-        
+
     }
 }
 
@@ -57,7 +60,18 @@ export const updateProductByClave = async (req, res) => {
 export const deleteProductByClave = async (req, res) => {
     const { Clave } = req.params;
     try {
-        await Product.findOneAndDelete({clave: Clave});
+        await Product.findOneAndDelete({ clave: Clave });
+        try {
+            const allStyles = await Estilo.find();
+            allStyles.map(async(style) => {
+                if (style.clave.split('-')[0] === Clave) {
+                    await deleteImage(folder, style.clave )
+                    await Estilo.findOneAndDelete({clave : style.clave})
+                }
+            })
+        } catch (error) {
+            console.log("No hay estilos");
+        }
         res.status(200).json({ error: false, message: "Producto eliminado correctamente." });
     } catch (error) {
         console.error("Error deleting product:", error);

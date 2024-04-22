@@ -2,7 +2,6 @@ import { Router } from "express";
 
 const router = Router()
 import *as estilosCtrl from "../controllers/estilos.controller"
-import { emprendedorasLimiter } from "../middlewares/rateLimitMiddleware";
 
 import { authJwt } from "../middlewares";
 const multer = require('multer');
@@ -30,7 +29,7 @@ router.post("/", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")] , 
 
 router.get("/", estilosCtrl.getEstilos)
 
-router.put("/:Clave", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")], estilosCtrl.updateEstiloByClave)
+router.put("/:Clave/:Nombre", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")], estilosCtrl.updateEstiloByClave)
 
 router.delete("/:Clave", [authJwt.verifyToken, authJwt.isAdmin], estilosCtrl.deleteEstiloByClave)
  

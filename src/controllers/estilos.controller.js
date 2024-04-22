@@ -1,74 +1,64 @@
+import { deleteImage, uploadImage } from "../middlewares/uploadImg";
 import Estilo from "../models/Estilo";
-import { postImageProduct } from "./uploadImg";
+import Product from "../models/Product";
+const folder = 'imgsStyle';
 
 export const createEstilo = async (req, res) => {
     const { clave, nombre, cantidad, precio, categoria, descripcion } = req.body;
     try {
-        let url = req.file ? await postImageProduct(req.file, clave, clave) : req.body.img;
-        if (req.file) {
-            url = `https://drive.google.com/uc?export=view&id=${url.id}`
-        }
-        const newEstilo = new Estilo({
-            clave,
-            nombre,
-            cantidad: parseInt(cantidad),
-            precio: parseInt(precio),
-            categoria,
-            descripcion,
-            img: url
-        });
 
         if (await Estilo.findOne({ clave: clave })) {
             res.status(200).json({ existe: true, error: false, message: `Estilo con clave: ${clave} ya esta agregado.` });
         } else {
+            await Product.findOneAndUpdate(
+                { clave: clave.split('-')[0] },
+                { $inc: { cantidad: 1 } }
+            );
+            let url = req.file ? await uploadImage(req.file, clave, clave, folder) : req.body.img;
+
+            const newEstilo = new Estilo({
+                clave,
+                nombre,
+                cantidad: parseInt(cantidad),
+                precio: parseInt(precio),
+                categoria,
+                descripcion,
+                img: url
+            });
             await newEstilo.save();
             res.status(201).json({ existe: false, error: false, message: "Estilo creado correctamente." });
         }
     } catch (error) {
-        res.status(500).json({error: true, message: `Error al crear el Estilo: ${error}` });
+        res.status(500).json({ error: true, message: `Error al crear el Estilo: ${error}` });
     }
 
 
 }
 
 export const getEstilos = async (req, res) => {
-    try {
-        const verEstilos = await Estilo.find()
-        res.status(200).json(verEstilos);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al obtener los estilos' });
-    }
-
+    const verEstilos = await Estilo.find()
+    console.log(verEstilos);
+    res.status(200).json(verEstilos);
 }
 
 export const updateEstiloByClave = async (req, res) => {
-    const { Clave } = req.params;
-    const { clave, nombre, cantidad, precio, categoria, descripcion, img } = req.body;
+    console.log(req.body);
+    const { Clave, Nombre } = req.params;
+    const { clave, nombre, cantidad, precio, categoria, descripcion } = req.body;
     try {
-        let url = req.file ? await postImageProduct(req.file, clave, clave) : req.body.img;
-        if (req.file) {
-            url = `https://drive.google.com/uc?export=view&id=${url.id}`
-        }
-        const newEstilo = {
-            clave: clave,
-            nombre: nombre,
-            cantidad: parseInt(cantidad),
-            precio: parseInt(precio),
-            categoria: categoria,
-            descripcion: descripcion,
-            img: url
-        };
-        if (Clave === clave) {
-            await Estilo.findOneAndUpdate(
-                { clave: clave },
-                newEstilo,
-                { new: true }
-            );
-            res.status(200).json({ existe: false, error: false, message: "Estilo actualizado correctamente." });
-        } else if (await Estilo.findOne({ clave: clave })) {
-            res.status(200).json({ existe: true, error: false, message: `Estilo con clave: ${clave} ya esta agregado.` });
+        if (Nombre !== nombre && await Estilo.findOne({ nombre: nombre })) {
+            res.status(200).json({ existe: true, error: false, message: `Estilo con nombre: ${nombre} ya esta agregado.` });
         } else {
+            let url = req.file ? await uploadImage(req.file, Clave, clave, folder) : req.body.img;
+            const newEstilo = {
+                clave: clave,
+                nombre: nombre,
+                cantidad: parseInt(cantidad),
+                precio: parseInt(precio),
+                categoria: categoria,
+                descripcion: descripcion,
+                img: url
+            };
             await Estilo.findOneAndUpdate(
                 { clave: Clave },
                 newEstilo,
@@ -85,6 +75,11 @@ export const deleteEstiloByClave = async (req, res) => {
     const { Clave } = req.params;
     try {
         await Estilo.findOneAndDelete({ clave: Clave });
+        await Product.findOneAndUpdate(
+            { clave: Clave.split('-')[0] },
+            { $inc: { cantidad: -1 } }
+        )
+        await deleteImage(folder, Clave);
         res.status(200).json({ error: false, message: "Estilo eliminado correctamente." });
     } catch (error) {
         console.error("Error deleting product:", error);
