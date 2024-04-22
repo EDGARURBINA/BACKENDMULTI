@@ -47,12 +47,12 @@ export const createEmprendedora = async (req, res) => {
 export const getEmprendedoras = async (req, res) => {
     try {
         const emprendedoras = await Emprendedora.find().sort({ totalVenta: -1 });
-
+        console.log(1);
         if (!emprendedoras || emprendedoras.length === 0) {
             console.log("No se encontraron Emprendedoras.");
             res.status(404).json({message: "No se encontraron Emprendedoras." });
         }
-
+        console.log(1);
         let topValue = 1;
         for (let i = 0; i < emprendedoras.length; i++) {
             const emprendedora = emprendedoras[i];
