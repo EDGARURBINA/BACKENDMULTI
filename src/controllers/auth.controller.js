@@ -12,7 +12,7 @@ export const validatePassword = async (req, res) => {
             res.status(200).json({ message: "Contraseña correcta." });
         } else {
             res.status(401).json({ message: "Contraseña incorrecta." });
-        } 
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Hubo un error.", error: error });
@@ -44,11 +44,11 @@ export const singin = async (req, res) => {
     let token = '';
     if (adminFound) {
         const matchPassword = await User.comparePassword(req.body.password, adminFound.password)
-        if (!matchPassword) res.status(403).json({ error: true, message: "Contraseña incorrecta."})
+        if (!matchPassword) res.status(403).json({ error: true, message: "Contraseña incorrecta." })
         token = jwt.sign({ id: adminFound._id }, config.SECRET, {
             expiresIn: 86400
         });
-        res.status(200).json({ error: false, token: token, path:'/AdminEntrepreneurs' })
+        res.status(200).json({ error: false, token: token, path: '/AdminEntrepreneurs' })
     } else {
         res.json({ error: true, message: "Usuario no encontrado." })
     }
@@ -59,6 +59,7 @@ export const singUp = async (req, res) => {
     const { username, email, password, roles } = req.body;
 
     try {
+
         const newUser = new User({
             username,
             email,
