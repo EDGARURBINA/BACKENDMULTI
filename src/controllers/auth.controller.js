@@ -55,16 +55,28 @@ export const singin = async (req, res) => {
 };
 
 
-export const signup = async (req, res) => {
+export const singUp = async (req, res) => {
+    const { username, email, password, roles } = req.body;
+
     try {
-        const { email, password , roles} = req.body;
+        const newUser = new User({
+            username,
+            email,
+            password: await User.encryptPassword(password)
+        });
 
-        const newUser = new User({ email, password, roles });
-        await newUser.save();
+        if (roles) {
+            const foundRoles = await Role.find({ name: { $in: roles } });
+            newUser.roles = foundRoles.map(role => role._id);
+        } else {
+            const role = await Role.findOne({ name: "user" });
+            newUser.roles = [role._id];
+        }
 
-        res.status(201).json({ error: false, message: "Usuario registrado exitosamente." });
+        const savedUser = await newUser.save();
+        res.status(200).json({ user: savedUser });
     } catch (error) {
-        console.error("Error al registrar usuario:", error);
-        res.status(500).json({ error: true, message: "Error interno del servidor." });
+        console.error(error);
+        res.status(500).json({ message: "Error al crear el usuario" });
     }
 };
