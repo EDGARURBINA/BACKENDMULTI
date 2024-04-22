@@ -3,6 +3,7 @@ import { Router } from "express";
 const router = Router()
 import *as emprenderodorasCtrl from "../controllers/emprendedora.controller"
 import { emprendedorasLimiter } from "../middlewares/rateLimitMiddleware";
+import { createEmprendedora } from "../controllers/emprendedora.controller";
 
 import { authJwt } from "../middlewares";
 import { validateImgField } from "../middlewares/authImg";
@@ -28,6 +29,7 @@ const upload = multer({
 });
 
 router.post("/", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img")] , emprenderodorasCtrl.createEmprendedora)
+router.post("/create", [authJwt.verifyToken, authJwt.isAdmin, upload.single("img"), createEmprendedora])
 
 router.get("/", emprenderodorasCtrl.getEmprendedoras)
 
