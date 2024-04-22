@@ -50,7 +50,7 @@ export const getEmprendedoras = async (req, res) => {
 
         if (!emprendedoras || emprendedoras.length === 0) {
             console.log("No se encontraron Emprendedoras.");
-            return;
+            res.status(404).json({message: "No se encontraron Emprendedoras." });
         }
 
         let topValue = 1;
