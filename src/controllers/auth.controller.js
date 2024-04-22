@@ -57,9 +57,9 @@ export const singin = async (req, res) => {
 
 export const signup = async (req, res) => {
     try {
-        const { email, password , role} = req.body;
+        const { email, password , roles} = req.body;
 
-        const newUser = new User({ email, password, role });
+        const newUser = new User({ email, password, roles });
         await newUser.save();
 
         res.status(201).json({ error: false, message: "Usuario registrado exitosamente." });
