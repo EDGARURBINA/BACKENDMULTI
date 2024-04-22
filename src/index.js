@@ -2,6 +2,6 @@ import app from "./app"
 import "./database"
 
 
-app.listen("52.15.237.151");
+app.listen(27017);
 
-console.log("escuchando el puerto ", "52.15.237.151")
+console.log("escuchando el puerto ", 27017)
