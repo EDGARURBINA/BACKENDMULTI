@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-mongoose.connect("mongodb://localhost:27017/TopperwareDB" ,{
+mongoose.connect("mongodb://52.15.237.151:27017/TopperwareDB" ,{
    
 })
 .then (db => console.log ("Db esta conectado"))

@@ -6,8 +6,8 @@ import Emprendedora from "../models/Emprendedora";
 
 export const validatePassword = async (req, res) => {
     const { password } = req.body;
-
     try {
+
         if (await User.findOne({ password: await User.comparePassword(password) })) {
             res.status(200).json({ message: "Contraseña correcta." });
         } else {
@@ -51,5 +51,25 @@ export const singin = async (req, res) => {
         res.status(200).json({ error: false, token: token, path:'/AdminEntrepreneurs' })
     } else {
         res.json({ error: true, message: "Usuario no encontrado." })
+    }
+};
+
+
+export const signup = async (req, res) => {
+    try {
+        const { email, password , role} = req.body;
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: true, message: "El usuario ya existe." });
+        }
+
+        const newUser = new User({ email, password, role });
+        await newUser.save();
+
+        res.status(201).json({ error: false, message: "Usuario registrado exitosamente." });
+    } catch (error) {
+        console.error("Error al registrar usuario:", error);
+        res.status(500).json({ error: true, message: "Error interno del servidor." });
     }
 };
