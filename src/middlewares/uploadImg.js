@@ -9,7 +9,7 @@ AWS.config.update({
   region: process.env.AWS_REGION
 });
 
-const bucketName = 'vir-to'; 
+const bucketName = 'virto-bucket'; 
 const s3 = new AWS.S3();
 
 const uploadImage = async (file, oldName, newName, folder) => {
